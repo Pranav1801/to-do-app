@@ -17,6 +17,8 @@ const updateTodoSchema = todoSchema.extend({
 
 export async function createTodo(formData: FormData) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
 
     const rawData = {
         title: formData.get('title'),
@@ -30,7 +32,7 @@ export async function createTodo(formData: FormData) {
 
     const { error } = await supabase
         .from('todos')
-        .insert([validated.data])
+        .insert([{ ...validated.data, user_id: user.id }])
 
     if (error) throw new Error(error.message)
     revalidatePath('/')
@@ -38,6 +40,8 @@ export async function createTodo(formData: FormData) {
 
 export async function updateTodo(formData: FormData) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
 
     const rawData = {
         id: Number(formData.get('id')),
@@ -56,6 +60,7 @@ export async function updateTodo(formData: FormData) {
         .from('todos')
         .update(updates)
         .eq('id', id)
+        .eq('user_id', user.id)
 
     if (error) throw new Error(error.message)
     revalidatePath('/')
@@ -63,12 +68,15 @@ export async function updateTodo(formData: FormData) {
 
 export async function deleteTodo(formData: FormData) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
     const id = Number(formData.get('id'))
 
     const { error } = await supabase
         .from('todos')
         .delete()
         .eq('id', id)
+        .eq('user_id', user.id)
 
     if (error) throw new Error(error.message)
     revalidatePath('/')
@@ -76,6 +84,8 @@ export async function deleteTodo(formData: FormData) {
 
 export async function toggleTodo(formData: FormData) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
     const id = Number(formData.get('id'))
     const currentState = formData.get('is_complete') === 'true'
 
@@ -83,6 +93,7 @@ export async function toggleTodo(formData: FormData) {
         .from('todos')
         .update({ is_complete: !currentState })
         .eq('id', id)
+        .eq('user_id', user.id)
 
     if (error) throw new Error(error.message)
     revalidatePath('/')
