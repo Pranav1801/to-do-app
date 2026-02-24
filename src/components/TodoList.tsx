@@ -7,12 +7,12 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
     }
 
     return (
-        <ul className= "space-y-2" >
-        {
-            todos.map((todo) => (
-                <TodoItem key= { todo.id } todo = { todo } />
-      ))
-        }
+        <ul className="space-y-2" >
+            {
+                todos.map((todo) => (
+                    <TodoItem key={todo.id} todo={todo} />
+                ))
+            }
         </ul>
-  )
+    )
 }
