@@ -20,11 +20,13 @@ export default function AddTodoDialog() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" /> Add Todo
-                </Button>
-            </DialogTrigger>
+            <DialogTrigger
+                render={(props) => (
+                    <Button {...props}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Todo
+                    </Button>
+                )}
+            />
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Create a new todo</DialogTitle>

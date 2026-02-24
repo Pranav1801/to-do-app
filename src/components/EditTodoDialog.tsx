@@ -24,11 +24,13 @@ export default function EditTodoDialog({ todo }: { todo: Todo }) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <Pencil className="h-4 w-4" />
-                </Button>
-            </DialogTrigger>
+            <DialogTrigger
+                render={(props) => (
+                    <Button variant="ghost" size="icon" {...props}>
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                )}
+            />
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Edit todo</DialogTitle>
