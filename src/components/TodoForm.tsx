@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100),
@@ -26,9 +27,11 @@ interface TodoFormProps {
   defaultValues?: Partial<FormValues>
   onSubmit: (values: FormValues) => Promise<void>
   submitLabel: string
+  isPending?: boolean
+  pendingLabel?: string
 }
 
-export default function TodoForm({ defaultValues, onSubmit, submitLabel }: TodoFormProps) {
+export default function TodoForm({ defaultValues, onSubmit, submitLabel, isPending, pendingLabel = 'Creating…' }: TodoFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || { title: '', description: '' },
@@ -68,7 +71,16 @@ export default function TodoForm({ defaultValues, onSubmit, submitLabel }: TodoF
             </FormItem>
           )}
         />
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {pendingLabel}
+            </>
+          ) : (
+            submitLabel
+          )}
+        </Button>
       </form>
     </Form>
   )

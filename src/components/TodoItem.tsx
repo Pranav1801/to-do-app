@@ -4,9 +4,10 @@ import { useTransition } from 'react'
 import { Todo } from '@/types/todo'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Loader2 } from 'lucide-react'
 import { toggleTodo, deleteTodo } from '@/app/actions/todo-actions'
 import EditTodoDialog from './EditTodoDialog'
+import { toast } from 'sonner'
 
 export default function TodoItem({ todo }: { todo: Todo }) {
   const [isTogglePending, startToggleTransition] = useTransition()
@@ -19,10 +20,17 @@ export default function TodoItem({ todo }: { todo: Todo }) {
     startToggleTransition(() => toggleTodo(formData))
   }
 
-  const deleteAction = () => {
+  const deleteAction = async () => {
     const formData = new FormData()
     formData.append('id', todo.id.toString())
-    startDeleteTransition(() => deleteTodo(formData))
+    startDeleteTransition(async () => {
+      const result = await deleteTodo(formData)
+      if (result.success) {
+        toast.success(result.message)
+      } else {
+        toast.error(result.message)
+      }
+    })
   }
 
   return (
@@ -45,7 +53,7 @@ export default function TodoItem({ todo }: { todo: Todo }) {
       <div className="flex gap-2">
         <EditTodoDialog todo={todo} />
         <Button variant="ghost" size="icon" onClick={deleteAction} disabled={isDeletePending}>
-          <Trash2 className="h-4 w-4" />
+          {isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
         </Button>
       </div>
     </li>
