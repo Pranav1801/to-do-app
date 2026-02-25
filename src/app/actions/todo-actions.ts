@@ -15,10 +15,10 @@ const updateTodoSchema = todoSchema.extend({
     is_complete: z.boolean().optional(),
 })
 
-export async function createTodo(formData: FormData) {
+export async function createTodo(formData: FormData): Promise<{ success: boolean; message: string }> {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Not authenticated')
+    if (!user) return { success: false, message: 'Not authenticated' }
 
     const rawData = {
         title: formData.get('title'),
@@ -27,21 +27,22 @@ export async function createTodo(formData: FormData) {
 
     const validated = todoSchema.safeParse(rawData)
     if (!validated.success) {
-        throw new Error('Validation failed')
+        return { success: false, message: 'Validation failed' }
     }
 
     const { error } = await supabase
         .from('todos')
         .insert([{ ...validated.data, user_id: user.id }])
 
-    if (error) throw new Error(error.message)
+    if (error) return { success: false, message: error.message }
     revalidatePath('/')
+    return { success: true, message: 'Task created successfully!' }
 }
 
-export async function updateTodo(formData: FormData) {
+export async function updateTodo(formData: FormData): Promise<{ success: boolean; message: string }> {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Not authenticated')
+    if (!user) return { success: false, message: 'Not authenticated' }
 
     const rawData = {
         id: Number(formData.get('id')),
@@ -52,7 +53,7 @@ export async function updateTodo(formData: FormData) {
 
     const validated = updateTodoSchema.safeParse(rawData)
     if (!validated.success) {
-        throw new Error('Validation failed')
+        return { success: false, message: 'Validation failed' }
     }
 
     const { id, ...updates } = validated.data
@@ -62,14 +63,15 @@ export async function updateTodo(formData: FormData) {
         .eq('id', id)
         .eq('user_id', user.id)
 
-    if (error) throw new Error(error.message)
+    if (error) return { success: false, message: error.message }
     revalidatePath('/')
+    return { success: true, message: 'Task updated successfully!' }
 }
 
-export async function deleteTodo(formData: FormData) {
+export async function deleteTodo(formData: FormData): Promise<{ success: boolean; message: string }> {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Not authenticated')
+    if (!user) return { success: false, message: 'Not authenticated' }
     const id = Number(formData.get('id'))
 
     const { error } = await supabase
@@ -78,8 +80,9 @@ export async function deleteTodo(formData: FormData) {
         .eq('id', id)
         .eq('user_id', user.id)
 
-    if (error) throw new Error(error.message)
+    if (error) return { success: false, message: error.message }
     revalidatePath('/')
+    return { success: true, message: 'Task deleted successfully!' }
 }
 
 export async function toggleTodo(formData: FormData) {
